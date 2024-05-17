@@ -6,7 +6,8 @@
 \usage{
 create_model_prelim(
   data,
-  n_vars,
+  n_vars_app,
+  n_vars_model,
   necessary_variables_prefixes,
   extra_variables_prefixes
 )

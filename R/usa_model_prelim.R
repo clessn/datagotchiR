@@ -19,24 +19,26 @@
 #' model <- create_model_prelim(data)
 #' }
 #' @export
-create_model_prelim <- function(data, n_vars,
+create_model_prelim <- function(data, n_vars_app, n_vars_model,
                                 necessary_variables_prefixes,
                                 extra_variables_prefixes) {
   repeat {
     tryCatch({
       # Randomly select extra variables
-      extra_vars_prefixes <- sample(extra_variables_prefixes, n_vars)
-      vars <- c(necessary_variables_prefixes, extra_vars)
+      extra_variables_prefixes <- sample(extra_variables_prefixes, n_vars_app)
+      vars <- c(necessary_variables_prefixes, extra_variables_prefixes)
+
+      model_vars <- sample(vars, n_vars_model, replace = TRUE)
 
       data_for_model <- data %>%
-        select(vote, all_of(necessary_variables_prefixes),
-               starts_with(extra_vars_prefixes))
+        select(vote, starts_with(model_vars))
 
+      necessary_variables <- names(data_for_model)[names(data_for_model) %in% necessary_variables_prefixes]
       extra_vars <- names(data_for_model)[!names(data_for_model) %in% c(necessary_variables_prefixes, "vote")]
 
       # Generate interaction terms
       n_interactions <- sample(2:10, 1)
-      interaction_terms_necessary <- sample(necessary_variables_prefixes, n_interactions, replace = TRUE)
+      interaction_terms_necessary <- sample(necessary_variables, n_interactions, replace = TRUE)
       interaction_terms_extra <- sample(extra_vars, n_interactions, replace = TRUE)
       interaction_terms <- paste0(interaction_terms_necessary, " * ", interaction_terms_extra)
 
