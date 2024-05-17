@@ -6,14 +6,22 @@
 \usage{
 create_model_prelim(
   data,
-  n_vars_app,
-  n_vars_model,
-  necessary_variables_prefixes,
-  extra_variables_prefixes
+  n_vars_app = 13,
+  n_vars_model = 10,
+  necessary_variables_prefixes = necessary_variables_prefixes,
+  extra_variables_prefixes = extra_variables_prefixes
 )
 }
 \arguments{
 \item{data}{A data frame containing the dataset to be used for model creation.}
+
+\item{n_vars_app}{An integer specifying the number of extra variables to use.}
+
+\item{n_vars_model}{An integer specifying the number of interaction terms to generate.}
+
+\item{necessary_variables_prefixes}{A vector of prefixes for necessary variables.}
+
+\item{extra_variables_prefixes}{A vector of prefixes for extra variables.}
 }
 \value{
 An object of class \code{polr} representing the fitted model.
@@ -29,7 +37,8 @@ data <- data.frame(vote = sample(c("totally Biden", "somewhat Biden", "neutral",
                    var1 = rnorm(100), var2 = rnorm(100), var3 = rnorm(100), var4 = rnorm(100))
 necessary_variables_prefixes <- c("var1", "var2")
 extra_variables_prefixes <- c("var3", "var4")
-n_vars <- 2
-model <- create_model_prelim(data)
+n_vars_app <- 2
+n_vars_model <- 10
+model <- create_model_prelim(data, n_vars_app, n_vars_model, necessary_variables_prefixes, extra_variables_prefixes)
 }
 }
