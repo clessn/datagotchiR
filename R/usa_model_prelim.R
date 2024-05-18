@@ -202,3 +202,72 @@ diagnose_model <- function(model){
 }
 
 
+#' Generate a Random Ordinal Regression Model using rstanarm::stan_polr
+#'
+#' This function randomly selects variables and interaction terms to generate
+#' an ordinal regression model using `rstanarm::stan_polr`.
+#'
+#' @param data The data frame containing the dataset.
+#' @param n_vars_app The number of additional variables to sample for the model.
+#' @param n_vars_model The total number of variables to include in the model.
+#' @param n_interactions The number of interaction terms to include in the model.
+#' @param necessary_variables_prefixes A vector of prefixes for the necessary variables.
+#' @param extra_variables_prefixes A vector of prefixes for the extra variables.
+#'
+#' @return A fitted `stan_polr` model object with additional information on the number of interactions and variables used.
+#' @export
+#'
+#' @importFrom rstanarm stan_polr
+#' @importFrom dplyr select starts_with
+#' @importFrom magrittr %>%
+#'
+#' @examples
+#' # Assuming `data` is your dataset and `necessary_variables_prefixes` and `extra_variables_prefixes` are defined:
+#' random_model <- random_stan_polr(data, 13, 27, 5, necessary_variables_prefixes, extra_variables_prefixes)
+random_stan_polr <- function(data,
+                             n_vars_app = 13,
+                             n_vars_model = 27,
+                             n_interactions,
+                             necessary_variables_prefixes = necessary_variables_prefixes,
+                             extra_variables_prefixes = extra_variables_prefixes) {
+  repeat {
+    tryCatch({
+      # Randomly select extra variables
+      extra_vars_prefixes <- sample(extra_variables_prefixes, n_vars_app)
+      vars <- c(necessary_variables_prefixes, extra_vars_prefixes)
+
+      model_vars <- sample(x = vars, n_vars_model, replace = TRUE)
+
+      data_for_model <- data %>%
+        select(vote, starts_with(model_vars))
+
+      necessary_variables <- names(data_for_model)[names(data_for_model) %in% necessary_variables_prefixes]
+      extra_vars <- names(data_for_model)[!names(data_for_model) %in% c(necessary_variables_prefixes, "vote")]
+
+      # Generate interaction terms
+      interaction_terms_necessary <- sample(necessary_variables, n_interactions, replace = TRUE)
+      interaction_terms_extra <- sample(extra_vars, n_interactions, replace = TRUE)
+      interaction_terms <- paste0(interaction_terms_necessary, " * ", interaction_terms_extra)
+
+      # Create the formula
+      formula <- paste0("vote ~ . + ", paste(interaction_terms, collapse = " + "))
+
+      # Create the model without showing warnings
+      model <- rstanarm::stan_polr(
+        formula = formula,
+        data = data_for_model,
+        method = "logistic",
+        prior = rstanarm::R2(0.2, "mean"),  # Example prior
+        init_r = 0.1,
+        seed = 12345
+      )
+      model[["n_interactions"]] <- n_interactions
+      model[["n_vars_model"]] <- n_vars_model
+      # If the model is created successfully, exit the repeat loop
+      return(model)
+    }, error = function(e) {
+      # Continue the loop to retry without showing messages
+      message("    Retrying model")
+    })
+  }
+}

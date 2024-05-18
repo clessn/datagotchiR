@@ -10,6 +10,7 @@ Imports:
     dplyr,
     magrittr,
     sure,
+    rstanarm (>= 2.21.1),
     MASS
 License: What license is it under?
 Encoding: UTF-8
