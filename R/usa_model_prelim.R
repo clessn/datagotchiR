@@ -258,7 +258,7 @@ random_stan_polr <- function(data,
       model <- rstanarm::stan_polr(
         formula = formula,
         data = data_for_model,
-        method = "logistic",
+        method = "probit",
         prior = rstanarm::R2(0.2, "mean"),  # Example prior
         init_r = 0.1,
         seed = 12345,
