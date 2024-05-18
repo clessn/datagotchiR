@@ -26,6 +26,7 @@
 #' }
 #' @export
 create_model_prelim <- function(data,
+                                lm = FALSE,
                                 n_vars_app = 13,
                                 n_vars_model = 10,
                                 necessary_variables_prefixes = necessary_variables_prefixes,
@@ -57,9 +58,13 @@ create_model_prelim <- function(data,
       # Create the model without showing warnings
       ord_model <- suppressWarnings(MASS::polr(as.formula(formula), data = data_for_model,
                                                Hess = TRUE, method = "logistic"))
-      data_for_model$vote <- (as.numeric(data_for_model$vote) - 1) / 4
-      lm_model <- suppressWarnings(lm(as.formula(formula), data = data_for_model))
-      model <- list(ord_model = ord_model, lm_model = lm_model)
+      if (isTRUE(lm)) {
+        data_for_model$vote <- (as.numeric(data_for_model$vote) - 1) / 4
+        lm_model <- suppressWarnings(lm(as.formula(formula), data = data_for_model))
+        model <- list(ord_model = ord_model, lm_model = lm_model)
+      } else {
+        model <- ord_model
+      }
       model[["n_interactions"]] <- n_interactions
       # If the model is created successfully, exit the repeat loop
       return(model)
