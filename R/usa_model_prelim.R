@@ -66,6 +66,7 @@ create_model_prelim <- function(data,
         model <- ord_model
       }
       model[["n_interactions"]] <- n_interactions
+      model[["n_vars_model"]] <- n_vars_model
       # If the model is created successfully, exit the repeat loop
       return(model)
     }, error = function(e) {
