@@ -74,3 +74,46 @@ create_model_prelim <- function(data,
     })
   }
 }
+
+#' Check if the Top Two Predicted Categories are Adjacent
+#'
+#' This function checks if the two most probable categories (based on their probabilities) are adjacent in an ordinal scale.
+#'
+#' @param probs A numeric vector of probabilities for each category.
+#'
+#' @return A logical value indicating whether the two most probable categories are adjacent (TRUE) or not (FALSE).
+#'
+#' @examples
+#' probs <- c(0.1, 0.2, 0.3, 0.25, 0.15)
+#' is_adjacent(probs)
+#'
+#' @export
+is_adjacent <- function(probs) {
+  sorted_indices <- order(probs, decreasing = TRUE)
+  first_pred <- sorted_indices[1]
+  second_pred <- sorted_indices[2]
+  return(abs(first_pred - second_pred) == 1)
+}
+
+#' Count Adjacent Predictions in an Ordinal Model
+#'
+#' This function takes an ordinal model and returns the number of predictions where the two most probable categories are adjacent.
+#'
+#' @param model An ordinal model object (e.g., from \code{polr} in the \code{MASS} package).
+#'
+#' @return An integer representing the number of predictions where the two most probable categories are adjacent.
+#'
+#' @examples
+#' \dontrun{
+#' # Assuming ord_model is a fitted ordinal model and newdata is a data frame
+#' count_adjacent_predictions(ord_model)
+#' }
+#'
+#' @export
+count_adjacent_predictions <- function(model) {
+  ord <- predict(model, type = "probs")
+  adjacent_predictions <- apply(ord, 1, is_adjacent)
+  return(sum(adjacent_predictions))
+}
+
+
