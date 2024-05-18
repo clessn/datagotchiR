@@ -9,6 +9,7 @@ create_model_prelim(
   lm = FALSE,
   n_vars_app = 13,
   n_vars_model = 10,
+  n_interactions,
   necessary_variables_prefixes = necessary_variables_prefixes,
   extra_variables_prefixes = extra_variables_prefixes
 )

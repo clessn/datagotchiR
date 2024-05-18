@@ -29,6 +29,7 @@ create_model_prelim <- function(data,
                                 lm = FALSE,
                                 n_vars_app = 13,
                                 n_vars_model = 10,
+                                n_interactions,
                                 necessary_variables_prefixes = necessary_variables_prefixes,
                                 extra_variables_prefixes = extra_variables_prefixes) {
   repeat {
@@ -46,8 +47,6 @@ create_model_prelim <- function(data,
       extra_vars <- names(data_for_model)[!names(data_for_model) %in% c(necessary_variables_prefixes, "vote")]
 
       # Generate interaction terms
-      n_interactions <- sample(2:(n_vars_model - 5), 1)
-      n_interactions <- ifelse(n_interactions > 10, 10, n_interactions)
       interaction_terms_necessary <- sample(necessary_variables, n_interactions, replace = TRUE)
       interaction_terms_extra <- sample(extra_vars, n_interactions, replace = TRUE)
       interaction_terms <- paste0(interaction_terms_necessary, " * ", interaction_terms_extra)
