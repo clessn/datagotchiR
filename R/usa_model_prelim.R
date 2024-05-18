@@ -108,12 +108,56 @@ is_adjacent <- function(probs) {
 #' # Assuming ord_model is a fitted ordinal model and newdata is a data frame
 #' count_adjacent_predictions(ord_model)
 #' }
-#'
+#' @importFrom MASS polr
 #' @export
 count_adjacent_predictions <- function(model) {
   ord <- predict(model, type = "probs")
   adjacent_predictions <- apply(ord, 1, is_adjacent)
   return(sum(adjacent_predictions))
+}
+
+#' Check if the Top Two Predicted Categories are Extremes
+#'
+#' This function checks if the two most probable categories (based on their probabilities) are the two extremes in an ordinal scale.
+#'
+#' @param probs A numeric vector of probabilities for each category.
+#'
+#' @return A logical value indicating whether the two most probable categories are the two extremes (TRUE) or not (FALSE).
+#'
+#' @examples
+#' probs <- c(0.4, 0.1, 0.1, 0.1, 0.3)
+#' is_extreme(probs)
+#'
+#' @export
+is_extreme <- function(probs) {
+  sorted_indices <- order(probs, decreasing = TRUE)
+  first_pred <- sorted_indices[1]
+  second_pred <- sorted_indices[2]
+  # Assuming the extremes are the first and last categories
+  return((first_pred == 1 && second_pred == length(probs)) ||
+           (first_pred == length(probs) && second_pred == 1))
+}
+
+#' Count Extreme Predictions in an Ordinal Model
+#'
+#' This function takes an ordinal model and returns the number of predictions where the two most probable categories are the two extremes.
+#'
+#' @param model An ordinal model object (e.g., from \code{polr} in the \code{MASS} package).
+#' @param newdata A data frame containing the new data for which to make predictions.
+#'
+#' @return An integer representing the number of predictions where the two most probable categories are the two extremes.
+#'
+#' @examples
+#' \dontrun{
+#' # Assuming ord_model is a fitted ordinal model and newdata is a data frame
+#' count_extreme_predictions(ord_model, newdata)
+#' }
+#' @importFrom MASS polr
+#' @export
+count_extreme_predictions <- function(model, newdata) {
+  ord <- predict(model, newdata = newdata, type = "probs")
+  extreme_predictions <- apply(ord, 1, is_extreme)
+  return(sum(extreme_predictions))
 }
 
 
@@ -145,8 +189,9 @@ count_adjacent_predictions <- function(model) {
 diagnose_model <- function(model){
   df <- data.frame(
     model_iteration = model[["iteration"]],
+    extreme_predictions_count = count_extreme_predictions(model, newdata),
     adjacent_predictions_count = count_adjacent_predictions(model),
-    mean_surrogate_res = mean(sure::resids(model)),
+    mean_surrogate_res = mean(abs(sure::resids(model))),
     sd_surrogate_res = sd(sure::resids(model)),
     aic = AIC(model),
     bic = BIC(model),

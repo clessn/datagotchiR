@@ -20,5 +20,4 @@ This function takes an ordinal model and returns the number of predictions where
 # Assuming ord_model is a fitted ordinal model and newdata is a data frame
 count_adjacent_predictions(ord_model)
 }
-
 }
