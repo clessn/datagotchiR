@@ -12,7 +12,8 @@
 #'
 #' @return An object of class \code{polr} representing the fitted model.
 #' @import MASS
-#' @import dplyr
+#' @importFrom dplyr select starts_with all_of
+#' @importFrom magrittr %>%
 #' @examples
 #' \dontrun{
 #' data <- data.frame(vote = sample(c("totally Biden", "somewhat Biden", "neutral", "somewhat Trump", "totally Trump"), 100, replace = TRUE),
