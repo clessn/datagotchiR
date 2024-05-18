@@ -117,3 +117,44 @@ count_adjacent_predictions <- function(model) {
 }
 
 
+#' Diagnose an Ordinal Model
+#'
+#' This function takes an ordinal model and returns a data frame with various diagnostic metrics.
+#'
+#' @param model An ordinal model object (e.g., from \code{polr} in the \code{MASS} package).
+#'
+#' @return A data frame containing diagnostic metrics for the model, including:
+#' \item{model_iteration}{The iteration number of the model.}
+#' \item{adjacent_predictions_count}{The number of predictions where the two most probable categories are adjacent.}
+#' \item{mean_surrogate_res}{The mean of the surrogate residuals.}
+#' \item{sd_surrogate_res}{The standard deviation of the surrogate residuals.}
+#' \item{aic}{The Akaike Information Criterion of the model.}
+#' \item{bic}{The Bayesian Information Criterion of the model.}
+#' \item{ivs}{The independent variables in the model.}
+#' \item{n_interactions}{The number of interaction terms in the model.}
+#' \item{n_vars_model}{The number of variables in the model.}
+#'
+#' @examples
+#' \dontrun{
+#' # Assuming ord_model is a fitted ordinal model
+#' diagnostics <- diagnose_model(ord_model)
+#' print(diagnostics)
+#' }
+#'
+#' @export
+diagnose_model <- function(model){
+  df <- data.frame(
+    model_iteration = model[["iteration"]],
+    adjacent_predictions_count = count_adjacent_predictions(model),
+    mean_surrogate_res = mean(sure::resids(model)),
+    sd_surrogate_res = sd(sure::resids(model)),
+    aic = AIC(model),
+    bic = BIC(model),
+    ivs = attr(model[["terms"]], "term.labels"),
+    n_interactions = model[["n_interactions"]],
+    n_vars_model = model[["n_vars_model"]]
+  )
+  return(df)
+}
+
+
