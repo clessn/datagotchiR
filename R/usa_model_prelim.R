@@ -154,8 +154,8 @@ is_extreme <- function(probs) {
 #' }
 #' @importFrom MASS polr
 #' @export
-count_extreme_predictions <- function(model, newdata) {
-  ord <- predict(model, newdata = newdata, type = "probs")
+count_extreme_predictions <- function(model) {
+  ord <- predict(model, type = "probs")
   extreme_predictions <- apply(ord, 1, is_extreme)
   return(sum(extreme_predictions))
 }
@@ -189,7 +189,7 @@ count_extreme_predictions <- function(model, newdata) {
 diagnose_model <- function(model){
   df <- data.frame(
     model_iteration = model[["iteration"]],
-    extreme_predictions_count = count_extreme_predictions(model, newdata),
+    extreme_predictions_count = count_extreme_predictions(model),
     adjacent_predictions_count = count_adjacent_predictions(model),
     mean_surrogate_res = mean(abs(sure::resids(model))),
     sd_surrogate_res = sd(sure::resids(model)),

@@ -4,7 +4,7 @@
 \alias{count_extreme_predictions}
 \title{Count Extreme Predictions in an Ordinal Model}
 \usage{
-count_extreme_predictions(model, newdata)
+count_extreme_predictions(model)
 }
 \arguments{
 \item{model}{An ordinal model object (e.g., from \code{polr} in the \code{MASS} package).}
