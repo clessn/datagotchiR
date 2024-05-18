@@ -230,7 +230,8 @@ random_stan_polr <- function(data,
                              n_interactions,
                              necessary_variables_prefixes = necessary_variables_prefixes,
                              extra_variables_prefixes = extra_variables_prefixes,
-                             refresh = 0) {
+                             refresh = 0,
+                             chains = 4) {
   repeat {
     tryCatch({
       # Randomly select extra variables
@@ -261,7 +262,8 @@ random_stan_polr <- function(data,
         prior = rstanarm::R2(0.2, "mean"),  # Example prior
         init_r = 0.1,
         seed = 12345,
-        refresh = refresh
+        refresh = refresh,
+        chains = chains
       )
       model[["n_interactions"]] <- n_interactions
       model[["n_vars_model"]] <- n_vars_model

@@ -11,7 +11,8 @@ random_stan_polr(
   n_interactions,
   necessary_variables_prefixes = necessary_variables_prefixes,
   extra_variables_prefixes = extra_variables_prefixes,
-  refresh = 0
+  refresh = 0,
+  chains = 4
 )
 }
 \arguments{
