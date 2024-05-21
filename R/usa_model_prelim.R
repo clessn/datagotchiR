@@ -186,7 +186,7 @@ count_extreme_predictions <- function(model) {
 #'
 #' @export
 diagnose_model <- function(model){
-  preds <- as.vector(predict(model, type = "class"))
+  preds <- as.vector(stats::predict(model, type = "class"))
   real_values <- as.vector(model$model[, 1])
   prop_success <- sum(preds == real_values) / length(real_values)
   df <- data.frame(
