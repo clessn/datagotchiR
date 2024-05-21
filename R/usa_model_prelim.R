@@ -186,12 +186,16 @@ count_extreme_predictions <- function(model) {
 #'
 #' @export
 diagnose_model <- function(model){
+  preds <- as.vector(predict(model, type = "class"))
+  real_values <- as.vector(model$model[, 1])
+  prop_success <- sum(preds == real_values) / length(real_values)
   df <- data.frame(
     model_iteration = model[["iteration"]],
     extreme_predictions_count = count_extreme_predictions(model),
     adjacent_predictions_count = count_adjacent_predictions(model),
     mean_surrogate_res = mean(abs(sure::resids(model))),
     sd_surrogate_res = sd(sure::resids(model)),
+    prop_success = prop_success,
     aic = AIC(model),
     bic = BIC(model),
     ivs = attr(model[["terms"]], "term.labels"),
