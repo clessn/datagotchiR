@@ -199,7 +199,7 @@ graph_post_demo_diagnose <- function(data, ridges_scale = 1.25){
                                   color = predicted_class, label = paste0(round(median * 100), "%")),
               size = 2, hjust = 0, vjust = -0.4,
               fontface = "bold", show.legend = FALSE) +
-    scale_alpha_continuous(range = c(0.6, 1)) +
+    scale_alpha_continuous(range = c(0.35, 1)) +
     clessnize::theme_clean_light() +
     scale_fill_manual(values = colors) +
     scale_color_manual(values = colors) +
