@@ -158,7 +158,8 @@ graph_post_demo_diagnose <- function(data, ridges_scale = 1.25){
                                ordered = TRUE))
   medians <- data %>%
     group_by(real_class, predicted_class) %>%
-    summarise(median = median(predicted_probability))
+    summarise(median = median(predicted_probability)) %>%
+    mutate(wanted_class = ifelse(real_class == predicted_class, 1, 0))
   plot <- ggplot(data, aes(x = predicted_probability, y = predicted_class, fill = predicted_class)) +
     geom_rect(data = panels_bg %>% filter(real_class == "totally_biden"),
               xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf,
