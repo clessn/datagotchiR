@@ -28,7 +28,7 @@ post_demo_diagnose <- function(
     models,
     n_iter = 100
 ){
-  prob_or_probs <- if (class(models[["vote"]] == "clm")) {
+  prob_or_probs <- if (class(models[["vote"]]) == "clm") {
     "prob"
   } else {
     "probs"
