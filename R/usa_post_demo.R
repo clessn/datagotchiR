@@ -149,8 +149,8 @@ graph_post_demo_diagnose <- function(data){
     tidyr::drop_na() %>%
     dplyr::mutate(predicted_class = factor(predicted_class,
                                            levels = c("totally_biden", "somewhat_biden", "undecided", "somewhat_trump", "totally_trump"),
-                                           ordered = TRUE))
-
+                                           ordered = TRUE),
+                  wanted_class = ifelse(real_class == predicted_class, 1, 0))
   panels_bg <- data.frame(real_class = levels(data$real_class),
                           predicted_probability = 0, predicted_class = 0) %>%
     mutate(real_class = factor(real_class,
@@ -184,8 +184,7 @@ graph_post_demo_diagnose <- function(data){
                strip.position = "left") +
     geom_vline(xintercept = 0.5, linetype = "dashed", alpha = 0.5) +
     scale_y_discrete(breaks = c("totally_biden", "somewhat_biden", "undecided", "somewhat_trump", "totally_trump")) +
-    ggridges::geom_density_ridges(aes(y = predicted_class),
-                                  alpha = 0.5,
+    ggridges::geom_density_ridges(aes(y = predicted_class, alpha = wanted_class),
                                   color = NA,
                                   quantile_lines = TRUE, quantiles = 0.5,
                                   bandwidth = 0.025, scale = 1.5) +
@@ -197,10 +196,11 @@ graph_post_demo_diagnose <- function(data){
     clessnize::theme_clean_light() +
     scale_fill_manual(values = colors) +
     scale_color_manual(values = colors) +
+    scale_alpha_continuous(range = c(0.15, 0.6)) +
     scale_x_continuous(breaks = seq(from = 0, to = 1, by = 0.1),
                        labels = paste0(seq(from = 0, to = 100, by = 10), "%"),
                        limits = c(0, 1)) +
-    guides(fill = guide_legend(nrow = 2)) +
+    guides(fill = guide_legend(nrow = 2), alpha = "none") +
     theme(strip.placement = "outside",
           strip.text.y = element_text(hjust = 0.5, size = 6),
           strip.background = element_rect(fill = "grey90", color = NA),
