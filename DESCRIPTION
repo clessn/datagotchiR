@@ -11,7 +11,10 @@ Imports:
     magrittr,
     sure,
     rstanarm (>= 2.21.1),
-    MASS
+    MASS,
+    marginaleffects,
+    tidyr,
+    stats
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
