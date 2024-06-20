@@ -189,7 +189,8 @@ graph_post_demo_diagnose <- function(data, ridges_scale = 1.25){
     ggridges::geom_density_ridges(aes(y = predicted_class, alpha = wanted_class),
                                   color = NA,
                                   quantile_lines = TRUE, quantiles = 0.5,
-                                  bandwidth = 0.025, scale = ridges_scale) +
+                                  bandwidth = 0.025, scale = ridges_scale,
+                                  show.legend = FALSE) +
     scale_alpha_continuous(range = c(0.1, 0.485)) +
     ggnewscale::new_scale("alpha") +
     geom_tile(data = medians, aes(x = median, color = predicted_class, alpha = wanted_class),
