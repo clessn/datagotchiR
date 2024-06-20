@@ -4,7 +4,7 @@
 \alias{graph_post_demo_diagnose}
 \title{Create a Density Ridge Plot for Post-Demographic Diagnosis}
 \usage{
-graph_post_demo_diagnose(data)
+graph_post_demo_diagnose(data, ridges_scale = 1.25)
 }
 \arguments{
 \item{data}{A data frame containing the results of the post-demographic diagnosis. The data frame

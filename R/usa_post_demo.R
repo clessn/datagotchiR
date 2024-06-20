@@ -129,6 +129,7 @@ post_demo_diagnose <- function(
 #' @import dplyr
 #' @import tidyr
 #' @import ggridges
+#' @import ggnewscale
 #' @importFrom clessnize theme_clean_light
 #'
 #' @examples
@@ -189,16 +190,18 @@ graph_post_demo_diagnose <- function(data, ridges_scale = 1.25){
                                   color = NA,
                                   quantile_lines = TRUE, quantiles = 0.5,
                                   bandwidth = 0.025, scale = ridges_scale) +
+    scale_alpha_continuous(range = c(0.1, 0.485)) +
+    ggnewscale::new_scale("alpha") +
     geom_tile(data = medians, aes(x = median, color = predicted_class, alpha = wanted_class),
               width = 0.0025, height = 0.65, show.legend = FALSE) +
     geom_text(data = medians, aes(x = median + 0.005, alpha = wanted_class,
                                   color = predicted_class, label = paste0(round(median * 100), "%")),
               size = 2, hjust = 0, vjust = -0.4,
               fontface = "bold", show.legend = FALSE) +
+    scale_alpha_continuous(range = c(0.6, 1)) +
     clessnize::theme_clean_light() +
     scale_fill_manual(values = colors) +
     scale_color_manual(values = colors) +
-    scale_alpha_continuous(range = c(0.2, 0.475)) +
     scale_x_continuous(breaks = seq(from = 0, to = 1, by = 0.1),
                        labels = paste0(seq(from = 0, to = 100, by = 10), "%"),
                        limits = c(0, 1)) +
