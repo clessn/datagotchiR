@@ -28,6 +28,11 @@ post_demo_diagnose <- function(
     models,
     n_iter = 100
 ){
+  prob_or_probs <- if (class(models[["vote"]] == "clm")) {
+    "prob"
+  } else {
+    "probs"
+  }
   if (identical(names(models), c("vote", "undecided"))) {
     model_data_vote <- models[["vote"]]$model
     model_data_undecided <- models[["undecided"]]$model
@@ -45,7 +50,7 @@ post_demo_diagnose <- function(
       new_model_vote <- update(models[["vote"]], data = train_data_vote)
       preds_vote <- marginaleffects::predictions(new_model_vote,
                                                  newdata = test_data,
-                                                 type = "prob") %>%
+                                                 type = prob_or_probs) %>%
         dplyr::select(id,
                       predicted_class = group,
                       predicted_probability = estimate) %>%
@@ -94,7 +99,7 @@ post_demo_diagnose <- function(
       new_model <- update(models, data = train_data)
       preds <- marginaleffects::predictions(new_model,
                                             newdata = test_data,
-                                            type = "prob") %>%
+                                            type = prob_or_probs) %>%
         dplyr::select(rowid,
                       real_class = !!sym(new_model$formula[[2]]),
                       predicted_class = group,
