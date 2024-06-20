@@ -14,7 +14,10 @@ Imports:
     MASS,
     marginaleffects,
     tidyr,
-    stats
+    stats,
+    ggplot2,
+    ggridges,
+    clessnize
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true

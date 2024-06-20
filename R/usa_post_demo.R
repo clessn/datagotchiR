@@ -113,3 +113,98 @@ post_demo_diagnose <- function(
     return(pred_data)
   }
 }
+
+
+#' Create a Density Ridge Plot for Post-Demographic Diagnosis
+#'
+#' This function creates a density ridge plot for the results of post-demographic diagnosis,
+#' showing the distribution of predicted probabilities across different classes.
+#'
+#' @param data A data frame containing the results of the post-demographic diagnosis. The data frame
+#' should have columns `real_class`, `predicted_class`, and `predicted_probability`.
+#'
+#' @return A ggplot2 object representing the density ridge plot.
+#'
+#' @import ggplot2
+#' @import dplyr
+#' @import tidyr
+#' @import ggridges
+#' @importFrom clessnize theme_clean_light
+#'
+#' @examples
+#' # Example usage:
+#' data <- data.frame(
+#'   real_class = factor(sample(c("totally_biden", "somewhat_biden", "undecided", "somewhat_trump", "totally_trump"), 100, replace = TRUE)),
+#'   predicted_class = factor(sample(c("totally_biden", "somewhat_biden", "undecided", "somewhat_trump", "totally_trump"), 100, replace = TRUE)),
+#'   predicted_probability = runif(100)
+#' )
+#' plot <- graph_post_demo_diagnose(data)
+#' print(plot)
+#'
+#' @export
+graph_post_demo_diagnose <- function(data){
+  library(ggplot2)
+  library(dplyr)
+  data <- data %>%
+    tidyr::drop_na() %>%
+    dplyr::mutate(predicted_class = factor(predicted_class,
+                                           levels = c("totally_biden", "somewhat_biden", "undecided", "somewhat_trump", "totally_trump"),
+                                           ordered = TRUE))
+
+  panels_bg <- data.frame(real_class = levels(data$real_class),
+                          predicted_probability = 0, predicted_class = 0) %>%
+    mutate(real_class = factor(real_class,
+                               levels = c("totally_biden", "somewhat_biden", "undecided", "somewhat_trump", "totally_trump"),
+                               ordered = TRUE))
+  medians <- data %>%
+    group_by(real_class, predicted_class) %>%
+    summarise(median = median(predicted_probability))
+  plot <- ggplot(data, aes(x = predicted_probability, y = predicted_class, fill = predicted_class)) +
+    geom_rect(data = panels_bg %>% filter(real_class == "totally_biden"),
+              xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf,
+              fill = colors["totally_biden"],
+              alpha = 0.1) +
+    geom_rect(data = panels_bg %>% filter(real_class == "somewhat_biden"),
+              xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf,
+              fill = colors["somewhat_biden"],
+              alpha = 0.1) +
+    geom_rect(data = panels_bg %>% filter(real_class == "undecided"),
+              xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf,
+              fill = colors["undecided"],
+              alpha = 0.1) +
+    geom_rect(data = panels_bg %>% filter(real_class == "somewhat_trump"),
+              xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf,
+              fill = colors["somewhat_trump"],
+              alpha = 0.1) +
+    geom_rect(data = panels_bg %>% filter(real_class == "totally_trump"),
+              xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf,
+              fill = colors["totally_trump"],
+              alpha = 0.1) +
+    facet_wrap(~real_class, ncol = 1,
+               strip.position = "left") +
+    geom_vline(xintercept = 0.5, linetype = "dashed", alpha = 0.5) +
+    scale_y_discrete(breaks = c("totally_biden", "somewhat_biden", "undecided", "somewhat_trump", "totally_trump")) +
+    ggridges::geom_density_ridges(aes(y = predicted_class),
+                                  alpha = 0.5,
+                                  color = NA,
+                                  quantile_lines = TRUE, quantiles = 0.5,
+                                  bandwidth = 0.025, scale = 1.5) +
+    geom_tile(data = medians, aes(x = median, color = predicted_class),
+              width = 0.0025, height = 0.65, show.legend = FALSE) +
+    geom_text(data = medians, aes(x = median + 0.005,
+                                  color = predicted_class, label = paste0(round(median * 100), "%")),
+              size = 2, hjust = 0, vjust = -0.5, show.legend = FALSE) +
+    clessnize::theme_clean_light() +
+    scale_fill_manual(values = colors) +
+    scale_color_manual(values = colors) +
+    scale_x_continuous(breaks = seq(from = 0, to = 1, by = 0.1),
+                       labels = paste0(seq(from = 0, to = 100, by = 10), "%"),
+                       limits = c(0, 1)) +
+    guides(fill = guide_legend(nrow = 2)) +
+    theme(strip.placement = "outside",
+          strip.text.y = element_text(hjust = 0.5, size = 6),
+          strip.background = element_rect(fill = "grey90", color = NA),
+          axis.text.y = element_text(vjust = 0))
+  return(plot)
+}
+
