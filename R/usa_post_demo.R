@@ -48,14 +48,24 @@ post_demo_diagnose <- function(
         tidyr::drop_na()
       test_data <- base_model_data[-train_ix, ]
       new_model_vote <- update(models[["vote"]], data = train_data_vote)
-      preds_vote <- marginaleffects::predictions(new_model_vote,
-                                                 newdata = test_data,
-                                                 type = prob_or_probs) %>%
-        dplyr::select(id,
-                      predicted_class = group,
-                      predicted_probability = estimate) %>%
-        dplyr::arrange(id) %>%
-        dplyr::mutate(iteration = i)
+      # Utiliser tryCatch pour gérer les erreurs
+      preds_vote <- tryCatch({
+        marginaleffects::predictions(new_model_vote,
+                                     newdata = test_data,
+                                     type = "prob") %>%
+          dplyr::select(id,
+                        predicted_class = group,
+                        predicted_probability = estimate) %>%
+          dplyr::arrange(id) %>%
+          dplyr::mutate(iteration = i)
+      }, error = function(e) {
+        return(NULL)
+      })
+      # Passer à l'itération suivante si preds_vote est NULL
+      if (is.null(preds_vote)) {
+        message("Skipping iteration ", i)
+        next
+      }
       new_model_undecided <- update(models[["undecided"]], data = train_data_undecided)
       preds_undecided <- marginaleffects::predictions(new_model_undecided,
                                                       newdata = test_data,
