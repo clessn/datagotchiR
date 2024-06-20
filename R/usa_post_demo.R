@@ -193,12 +193,12 @@ graph_post_demo_diagnose <- function(data, ridges_scale = 1.25){
               width = 0.0025, height = 0.65, show.legend = FALSE) +
     geom_text(data = medians, aes(x = median + 0.005, alpha = wanted_class,
                                   color = predicted_class, label = paste0(round(median * 100), "%")),
-              size = 2, hjust = 0, vjust = -0.5,
+              size = 2, hjust = 0, vjust = -0.4,
               fontface = "bold", show.legend = FALSE) +
     clessnize::theme_clean_light() +
     scale_fill_manual(values = colors) +
     scale_color_manual(values = colors) +
-    scale_alpha_continuous(range = c(0.15, 0.485)) +
+    scale_alpha_continuous(range = c(0.2, 0.475)) +
     scale_x_continuous(breaks = seq(from = 0, to = 1, by = 0.1),
                        labels = paste0(seq(from = 0, to = 100, by = 10), "%"),
                        limits = c(0, 1)) +
