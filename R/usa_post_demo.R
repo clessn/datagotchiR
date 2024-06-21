@@ -185,7 +185,7 @@ post_demo_diagnose <- function(
       train_ix <- sample(1:nrow(model_data), nrow(model_data) * 0.8)
       train_data <- model_data[train_ix, ]
       test_data <- model_data[-train_ix, ] %>%
-        mutate(rowid = 1:nrow(.))
+        mutate(id = 1:nrow(.))
       if (class(models[["vote"]]) == "clm"){
         preds_vote <- update_and_predict_clm_model(models,
                                                    new_train_data = train_data,
@@ -197,7 +197,6 @@ post_demo_diagnose <- function(
                                                     test_data = test_data) %>%
           dplyr::mutate(iteration = i)
       }
-        dplyr::mutate(iteration = i)
       if (i == 1){
         pred_data <- list()
         pred_data[[1]] <- preds
