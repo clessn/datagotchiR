@@ -22,9 +22,9 @@
 #'
 #' @export
 update_and_predict_clm_model <- function(model, new_train_data, test_data){
-  new_formula <- as.formula(paste(c(models[["vote"]][["terms"]][[2]],
+  new_formula <- as.formula(paste(c(model[["terms"]][[2]],
                                     "~",
-                                    models[["vote"]][["terms"]][[3]]), collapse = " "))
+                                    model[["terms"]][[3]]), collapse = " "))
   new_model <- ordinal::clm(
     formula = new_formula,
     data = new_train_data,
@@ -32,24 +32,6 @@ update_and_predict_clm_model <- function(model, new_train_data, test_data){
   preds <- marginaleffects::predictions(new_model,
                                         newdata = test_data,
                                         type = "prob") %>%
-    dplyr::select(id,
-                  predicted_class = group,
-                  predicted_probability = estimate) %>%
-    dplyr::arrange(id)
-  return(preds)
-}
-
-update_and_predict_polr_model <- function(model, new_train_data, test_data){
-  new_formula <- as.formula(paste(c(models[["vote"]][["terms"]][[2]],
-                                    "~",
-                                    models[["vote"]][["terms"]][[3]]), collapse = " "))
-  new_model <- MASS::polr(
-    formula = new_formula,
-    data = new_train_data,
-    Hess = TRUE)
-  preds <- marginaleffects::predictions(new_model,
-                                        newdata = test_data,
-                                        type = "probs") %>%
     dplyr::select(id,
                   predicted_class = group,
                   predicted_probability = estimate) %>%
@@ -81,9 +63,9 @@ update_and_predict_polr_model <- function(model, new_train_data, test_data){
 #'
 #' @export
 update_and_predict_polr_model <- function(model, new_train_data, test_data){
-  new_formula <- as.formula(paste(c(models[["vote"]][["terms"]][[2]],
+  new_formula <- as.formula(paste(c(model[["terms"]][[2]],
                                     "~",
-                                    models[["vote"]][["terms"]][[3]]), collapse = " "))
+                                    model[["terms"]][[3]]), collapse = " "))
   new_model <- MASS::polr(
     formula = new_formula,
     data = new_train_data,
@@ -206,12 +188,12 @@ post_demo_diagnose <- function(
         mutate(rowid = 1:nrow(.))
       if (class(models[["vote"]]) == "clm"){
         preds_vote <- update_and_predict_clm_model(models,
-                                                   new_train_data = train_data_vote,
+                                                   new_train_data = train_data,
                                                    test_data = test_data) %>%
           dplyr::mutate(iteration = i)
       } else if (class(models[["vote"]]) == "polr") {
         preds_vote <- update_and_predict_polr_model(models,
-                                                    new_train_data = train_data_vote,
+                                                    new_train_data = train_data,
                                                     test_data = test_data) %>%
           dplyr::mutate(iteration = i)
       }
