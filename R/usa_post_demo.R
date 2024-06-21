@@ -150,10 +150,19 @@ post_demo_diagnose <- function(
                                                    test_data = test_data) %>%
           mutate(iteration = i)
       } else if (class(models[["vote"]]) == "polr") {
-        preds_vote <- update_and_predict_polr_model(models[["vote"]],
-                                                    new_train_data = train_data_vote,
-                                                    test_data = test_data) %>%
-          mutate(iteration = i)
+        preds_vote <- tryCatch({
+          update_and_predict_polr_model(models[["vote"]],
+                                        new_train_data = train_data_vote,
+                                        test_data = test_data) %>%
+            dplyr::mutate(iteration = i)
+        }, error = function(e) {
+          message("Skipping iteration ", i)
+          return(NULL)
+        })
+        # Passer à l'itération suivante si preds_vote est NULL
+        if (is.null(preds_vote)) {
+          next
+        }
       }
       new_model_undecided <- update(models[["undecided"]], data = train_data_undecided)
       preds_undecided <- marginaleffects::predictions(new_model_undecided,
