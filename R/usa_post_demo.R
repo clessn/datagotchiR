@@ -110,6 +110,7 @@ update_and_predict_polr_model <- function(model, new_train_data, test_data){
 #' @export
 post_demo_diagnose <- function(
     models,
+    base_model_data = base_model_data,
     n_iter = 100
 ){
   if (identical(names(models), c("vote", "undecided"))) {
@@ -197,6 +198,8 @@ post_demo_diagnose <- function(
                                                     test_data = test_data) %>%
           dplyr::mutate(iteration = i)
       }
+      preds <- left_join(preds, test_data %>% select(id, real_class = 1),
+                         by = "id")
       if (i == 1){
         pred_data <- list()
         pred_data[[1]] <- preds
