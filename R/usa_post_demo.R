@@ -192,23 +192,25 @@ post_demo_diagnose <- function(
                                                    new_train_data = train_data,
                                                    test_data = test_data) %>%
           dplyr::mutate(iteration = i)
+        preds <- left_join(preds, test_data %>% select(id, real_class = 1),
+                           by = "id")
       } else if (class(models) == "polr") {
         preds <- tryCatch({
           update_and_predict_polr_model(models,
                                         new_train_data = train_data,
                                         test_data = test_data) %>%
-            dplyr::mutate(iteration = i)
+            dplyr::mutate(iteration = i) %>%
+            left_join(., test_data %>% select(id, real_class = 1),
+                      by = "id")
         }, error = function(e) {
           message("\nSkipping iteration ", i)
           return(NULL)
         })
         # Passer à l'itération suivante si preds_vote est NULL
-        if (is.null(preds_vote)) {
+        if (is.null(preds)) {
           next
         }
         }
-      preds <- left_join(preds, test_data %>% select(id, real_class = 1),
-                         by = "id")
       if (i == 1){
         pred_data <- list()
         pred_data[[1]] <- preds
