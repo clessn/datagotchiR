@@ -186,12 +186,12 @@ post_demo_diagnose <- function(
       train_data <- model_data[train_ix, ]
       test_data <- model_data[-train_ix, ] %>%
         mutate(id = 1:nrow(.))
-      if (class(models[["vote"]]) == "clm"){
+      if (class(models) == "clm"){
         preds <- update_and_predict_clm_model(models,
                                                    new_train_data = train_data,
                                                    test_data = test_data) %>%
           dplyr::mutate(iteration = i)
-      } else if (class(models[["vote"]]) == "polr") {
+      } else if (class(models) == "polr") {
         preds <- update_and_predict_polr_model(models,
                                                     new_train_data = train_data,
                                                     test_data = test_data) %>%
