@@ -1,6 +1,108 @@
-#' Perform Post-Demographic Diagnosis on Models
+#' Update and Predict Cumulative Link Model (CLM)
 #'
-#' This function performs a post-demographic diagnosis on a set of models by iteratively
+#' This function updates a cumulative link model (CLM) with new training data and generates predictions on test data.
+#'
+#' @param model An ordinal regression model of class `clm` to be updated.
+#' @param new_train_data A data frame containing the new training data to update the model.
+#' @param test_data A data frame containing the test data for which predictions are to be made.
+#'
+#' @return A data frame containing the predictions with columns `id`, `predicted_class`, and `predicted_probability`.
+#'
+#' @importFrom ordinal clm
+#' @importFrom marginaleffects predictions
+#' @importFrom dplyr select arrange
+#'
+#' @examples
+#' # Example usage:
+#' model <- ordinal::clm(dv_vote ~ ivs_formula, data = train_data, Hess = TRUE)
+#' new_train_data <- train_data_sample
+#' test_data <- test_data_sample
+#' predictions <- update_and_predict_clm_model(model, new_train_data, test_data)
+#' print(predictions)
+#'
+#' @export
+update_and_predict_clm_model <- function(model, new_train_data, test_data){
+  new_formula <- as.formula(paste(c(models[["vote"]][["terms"]][[2]],
+                                    "~",
+                                    models[["vote"]][["terms"]][[3]]), collapse = " "))
+  new_model <- ordinal::clm(
+    formula = new_formula,
+    data = new_train_data,
+    Hess = TRUE)
+  preds <- marginaleffects::predictions(new_model,
+                                        newdata = test_data,
+                                        type = "prob") %>%
+    dplyr::select(id,
+                  predicted_class = group,
+                  predicted_probability = estimate) %>%
+    dplyr::arrange(id)
+  return(preds)
+}
+
+update_and_predict_polr_model <- function(model, new_train_data, test_data){
+  new_formula <- as.formula(paste(c(models[["vote"]][["terms"]][[2]],
+                                    "~",
+                                    models[["vote"]][["terms"]][[3]]), collapse = " "))
+  new_model <- MASS::polr(
+    formula = new_formula,
+    data = new_train_data,
+    Hess = TRUE)
+  preds <- marginaleffects::predictions(new_model,
+                                        newdata = test_data,
+                                        type = "probs") %>%
+    dplyr::select(id,
+                  predicted_class = group,
+                  predicted_probability = estimate) %>%
+    dplyr::arrange(id)
+  return(preds)
+}
+
+#' Update and Predict Proportional Odds Logistic Regression Model (polr)
+#'
+#' This function updates a proportional odds logistic regression model (polr) with new training data and generates predictions on test data.
+#'
+#' @param model A proportional odds logistic regression model of class `polr` to be updated.
+#' @param new_train_data A data frame containing the new training data to update the model.
+#' @param test_data A data frame containing the test data for which predictions are to be made.
+#'
+#' @return A data frame containing the predictions with columns `id`, `predicted_class`, and `predicted_probability`.
+#'
+#' @importFrom MASS polr
+#' @importFrom marginaleffects predictions
+#' @importFrom dplyr select arrange
+#'
+#' @examples
+#' # Example usage:
+#' model <- MASS::polr(dv_vote ~ ivs_formula, data = train_data, Hess = TRUE)
+#' new_train_data <- train_data_sample
+#' test_data <- test_data_sample
+#' predictions <- update_and_predict_polr_model(model, new_train_data, test_data)
+#' print(predictions)
+#'
+#' @export
+update_and_predict_polr_model <- function(model, new_train_data, test_data){
+  new_formula <- as.formula(paste(c(models[["vote"]][["terms"]][[2]],
+                                    "~",
+                                    models[["vote"]][["terms"]][[3]]), collapse = " "))
+  new_model <- MASS::polr(
+    formula = new_formula,
+    data = new_train_data,
+    Hess = TRUE)
+  preds <- marginaleffects::predictions(new_model,
+                                        newdata = test_data,
+                                        type = "probs") %>%
+    dplyr::select(id,
+                  predicted_class = group,
+                  predicted_probability = estimate) %>%
+    dplyr::arrange(id)
+  return(preds)
+}
+
+
+
+#' Perform Post-Demo Diagnosis on Models
+#'
+#' This function performs a post-demo diagnosis on a set of models by iteratively
 #' training and testing them on subsets of the data. It supports both a combined model
 #' setup (with "vote" and "undecided" models) and a single model setup.
 #'
@@ -28,11 +130,6 @@ post_demo_diagnose <- function(
     models,
     n_iter = 100
 ){
-  prob_or_probs <- if (class(models[["vote"]]) == "clm") {
-    "prob"
-  } else {
-    "probs"
-  }
   if (identical(names(models), c("vote", "undecided"))) {
     model_data_vote <- models[["vote"]]$model
     model_data_undecided <- models[["undecided"]]$model
@@ -47,24 +144,16 @@ post_demo_diagnose <- function(
       train_data_undecided <- model_data_undecided[train_ix, ] %>%
         tidyr::drop_na()
       test_data <- base_model_data[-train_ix, ]
-      new_model_vote <- update(models[["vote"]], data = train_data_vote)
-      # Utiliser tryCatch pour gérer les erreurs
-      preds_vote <- tryCatch({
-        marginaleffects::predictions(new_model_vote,
-                                     newdata = test_data,
-                                     type = "prob") %>%
-          dplyr::select(id,
-                        predicted_class = group,
-                        predicted_probability = estimate) %>%
-          dplyr::arrange(id) %>%
-          dplyr::mutate(iteration = i)
-      }, error = function(e) {
-        return(NULL)
-      })
-      # Passer à l'itération suivante si preds_vote est NULL
-      if (is.null(preds_vote)) {
-        message("Skipping iteration ", i)
-        next
+      if (class(models[["vote"]]) == "clm"){
+        preds_vote <- update_and_predict_clm_model(models[["vote"]],
+                                                   data = train_data_vote,
+                                                   test_data = test_data) %>%
+          mutate(iteration = i)
+      } else if (class(models[["vote"]]) == "polr") {
+        preds_vote <- update_and_predict_polr_model(models[["vote"]],
+                                                    data = train_data_vote,
+                                                    test_data = test_data) %>%
+          mutate(iteration = i)
       }
       new_model_undecided <- update(models[["undecided"]], data = train_data_undecided)
       preds_undecided <- marginaleffects::predictions(new_model_undecided,
@@ -106,15 +195,17 @@ post_demo_diagnose <- function(
       train_data <- model_data[train_ix, ]
       test_data <- model_data[-train_ix, ] %>%
         mutate(rowid = 1:nrow(.))
-      new_model <- update(models, data = train_data)
-      preds <- marginaleffects::predictions(new_model,
-                                            newdata = test_data,
-                                            type = prob_or_probs) %>%
-        dplyr::select(rowid,
-                      real_class = !!sym(new_model$formula[[2]]),
-                      predicted_class = group,
-                      predicted_probability = estimate) %>%
-        dplyr::arrange(rowid) %>%
+      if (class(models[["vote"]]) == "clm"){
+        preds_vote <- update_and_predict_clm_model(models[["vote"]],
+                                                   data = train_data_vote,
+                                                   test_data = test_data) %>%
+          dplyr::mutate(iteration = i)
+      } else if (class(models[["vote"]]) == "polr") {
+        preds_vote <- update_and_predict_polr_model(models[["vote"]],
+                                                    data = train_data_vote,
+                                                    test_data = test_data) %>%
+          dplyr::mutate(iteration = i)
+      }
         dplyr::mutate(iteration = i)
       if (i == 1){
         pred_data <- list()

@@ -2,7 +2,7 @@
 % Please edit documentation in R/usa_post_demo.R
 \name{post_demo_diagnose}
 \alias{post_demo_diagnose}
-\title{Perform Post-Demographic Diagnosis on Models}
+\title{Perform Post-Demo Diagnosis on Models}
 \usage{
 post_demo_diagnose(models, n_iter = 100)
 }
@@ -18,7 +18,7 @@ A data frame with predictions for each iteration, including the predicted class,
 predicted probability, and the real class.
 }
 \description{
-This function performs a post-demographic diagnosis on a set of models by iteratively
+This function performs a post-demo diagnosis on a set of models by iteratively
 training and testing them on subsets of the data. It supports both a combined model
 setup (with "vote" and "undecided" models) and a single model setup.
 }

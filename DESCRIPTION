@@ -18,7 +18,8 @@ Imports:
     ggplot2,
     ggridges,
     clessnize,
-    ggnewscale
+    ggnewscale,
+    ordinal
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
