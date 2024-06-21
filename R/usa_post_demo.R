@@ -156,7 +156,7 @@ post_demo_diagnose <- function(
                                         test_data = test_data) %>%
             dplyr::mutate(iteration = i)
         }, error = function(e) {
-          message("Skipping iteration ", i)
+          message("\nSkipping iteration ", i)
           return(NULL)
         })
         # Passer à l'itération suivante si preds_vote est NULL
