@@ -42,7 +42,7 @@ simulate_strat <- function(
     set_id = rep(1:length(vote_prediction), each = n),
     vote_intention = rnorm(length(vote_prediction) * n, mean = rep(vote_prediction, each = n), sd = rep(vote_sd, each = n) * conf_factor),
     turnout_likelihood = rnorm(length(turnout_prediction) * n, mean = rep(turnout_prediction, each = n), sd = rep(turnout_sd, each = n) * conf_factor)
-  ) |> 
+  )  %>% 
   mutate(
     vote_intention = pmin(pmax(vote_intention, 0), 1),
     turnout_likelihood = pmin(pmax(turnout_likelihood, 0), 1),
@@ -50,8 +50,8 @@ simulate_strat <- function(
     voted = ifelse(turnout_likelihood > 0.5, 1, 0),
     vote_intention = ifelse(voted == 0, "not_voted", vote_intention)
   )
-  final_results <- data |> 
-    group_by(set_id) |> 
+  final_results <- data %>%  
+    group_by(set_id) %>% 
     summarize(
       dem = sum(vote_intention == "dem"),
       rep = sum(vote_intention == "rep"),
