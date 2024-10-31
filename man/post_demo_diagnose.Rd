@@ -4,7 +4,7 @@
 \alias{post_demo_diagnose}
 \title{Perform Post-Demo Diagnosis on Models}
 \usage{
-post_demo_diagnose(models, n_iter = 100)
+post_demo_diagnose(models, base_model_data = base_model_data, n_iter = 100)
 }
 \arguments{
 \item{models}{A list of models. For the combined model setup, the list should contain
