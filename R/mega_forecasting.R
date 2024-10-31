@@ -36,6 +36,7 @@ simulate_strat <- function(
   n = 10,
   conf_level = 0.999
 ){
+  library(dplyr)
   conf_factor <- qnorm((1 + conf_level) / 2)
   data <- data.frame(
     set_id = rep(1:length(vote_prediction), each = n),
