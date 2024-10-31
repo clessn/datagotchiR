@@ -17,6 +17,7 @@
 #' @importFrom stats qnorm rnorm
 #' @importFrom dplyr mutate group_by summarize
 #' @importFrom tidyr pmin pmax
+#' @importFrom magrittr %>%
 #'
 #' @examples
 #' # Example usage:
